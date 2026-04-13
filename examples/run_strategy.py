@@ -192,10 +192,13 @@ except Exception:
     traceback.print_exc()
     raise SystemExit(1)
 
-print("Launching at http://127.0.0.1:8051 ...")
+import os
+port = int(os.environ.get("PORT", 8051))
+host = "0.0.0.0"
+print(f"Launching at http://{host}:{port} ...")
 try:
     from waitress import serve
-    serve(app.server, host="127.0.0.1", port=8051)
+    serve(app.server, host=host, port=port)
 except Exception:
     print("\n--- SERVER ERROR ---")
     traceback.print_exc()
