@@ -19,6 +19,8 @@ from quantcore.signals.mean_reversion import MeanReversionSignal
 from quantcore.signals.factors       import FactorModel
 from quantcore.signals.regime        import RegimeDetector
 from quantcore.signals.decay         import FactorDecayAnalyzer
+from quantcore.signals.trend         import TrendFollowingSignal
+from quantcore.signals.carry         import CarrySignal
 from quantcore.portfolio.optimizer   import PortfolioOptimizer
 from quantcore.portfolio.sizing      import KellyCriterion
 from quantcore.risk.engine           import RiskEngine
@@ -51,9 +53,11 @@ bm_returns   = feed.get_returns(bm_prices,    log=True)[BENCHMARK]
 print(f"Loaded {len(asset_prices)} days × {len(UNIVERSE)} assets")
 
 # ── 2. Signal function ──────────────────────────────────────────────
-mom_signal = MomentumSignal(lookback=252, skip=21)
-mr_signal  = MeanReversionSignal(window=63)
-factor_mdl = FactorModel()
+mom_signal   = MomentumSignal(lookback=252, skip=21)
+mr_signal    = MeanReversionSignal(window=63)
+factor_mdl   = FactorModel()
+trend_signal = TrendFollowingSignal(fast_span=8, slow_span=24)
+carry_signal = CarrySignal(window=252)
 
 def compute_alpha(prices_td: pd.DataFrame, date: pd.Timestamp) -> pd.Series:
     rets = np.log(prices_td / prices_td.shift(1)).dropna()
@@ -62,6 +66,8 @@ def compute_alpha(prices_td: pd.DataFrame, date: pd.Timestamp) -> pd.Series:
         lambda: mom_signal.combined(prices_td, rets),
         lambda: mr_signal.combined(prices_td),
         lambda: factor_mdl.composite_alpha(prices_td, rets),
+        lambda: trend_signal.combined(prices_td, rets),
+        lambda: carry_signal.combined(prices_td, rets),
     ]:
         try:
             s = sig_fn()

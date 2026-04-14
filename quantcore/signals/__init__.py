@@ -4,3 +4,6 @@ from .pairs import PairsTradingSignal
 from .factors import FactorModel
 from .regime import RegimeDetector
 from .decay import FactorDecayAnalyzer
+from .trend import TrendFollowingSignal
+from .carry import CarrySignal
+from .ml_alpha import MLAlphaModel

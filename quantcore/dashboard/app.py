@@ -330,16 +330,83 @@ def build_dashboard(
 
         # ── Header ──────────────────────────────────────────────
         dbc.Row(dbc.Col(html.Div([
-            html.H1("QuantCore", style={"color": GOLD, "fontWeight": "900",
-                                        "fontSize": "2.5rem", "margin": 0}),
+            html.A(
+                html.H1("QuantCore", style={"color": GOLD, "fontWeight": "900",
+                                            "fontSize": "2.5rem", "margin": 0,
+                                            "cursor": "pointer"}),
+                href="/", style={"textDecoration": "none"},
+                title="Click to return to home",
+            ),
             html.P("Institutional-grade quantitative research platform — powered by multi-factor alpha signals, "
-                   "HMM regime detection, and real-time valuation analytics.",
+                   "HMM regime detection, trend following, carry, and ML signal combination.",
                    style={"color": "#aaa", "margin": 0}),
         ], style={"padding": "24px 0 12px 0", "borderBottom": f"2px solid {GOLD}",
                   "marginBottom": "20px"}))),
 
         # ── KPIs ────────────────────────────────────────────────
         kpis,
+
+        # ══════════════════════════════════════════════════════
+        # HEDGE FUND STRATEGY LEGEND
+        # ══════════════════════════════════════════════════════
+        section_header("Signal Engine — Strategies Inspired by the World's Best Hedge Funds", GOLD),
+        _card([
+            html.P("QuantCore implements publicly documented quantitative strategies used by elite hedge funds. "
+                   "All formulas are derived from peer-reviewed academic literature.",
+                   style={"color": "#aaa", "marginBottom": "16px"}),
+            dbc.Row([
+                dbc.Col(_card([
+                    html.H6("Trend Following", style={"color": CYAN, "fontWeight": "bold"}),
+                    html.P("Inspired by Man AHL, Winton, Campbell & Co. "
+                           "EWMA crossover + time-series momentum (Moskowitz et al. 2012). "
+                           "Go long assets in uptrends, short in downtrends, "
+                           "scaled by realised volatility for equal risk contribution.",
+                           style={"color": "#bbb", "fontSize": "0.83rem"}),
+                ]), md=4),
+                dbc.Col(_card([
+                    html.H6("Carry Factor", style={"color": GREEN, "fontWeight": "bold"}),
+                    html.P("Inspired by AQR Capital (Koijen, Moskowitz, Pedersen 2018). "
+                           "Buy high-yield / high-carry assets, sell low-carry. "
+                           "Earnings yield proxy + roll-down carry + stability carry "
+                           "blended into a single cross-sectional signal.",
+                           style={"color": "#bbb", "fontSize": "0.83rem"}),
+                ]), md=4),
+                dbc.Col(_card([
+                    html.H6("Multi-Factor Model", style={"color": PURPLE, "fontWeight": "bold"}),
+                    html.P("Inspired by AQR's published factor research (Asness et al.). "
+                           "Value, Momentum, Quality, Low-Vol, Reversal factors "
+                           "cross-sectionally z-scored and blended. "
+                           "IC/IR tracking validates each factor's predictive power.",
+                           style={"color": "#bbb", "fontSize": "0.83rem"}),
+                ]), md=4),
+            ]),
+            dbc.Row([
+                dbc.Col(_card([
+                    html.H6("Statistical Arbitrage", style={"color": ORANGE, "fontWeight": "bold"}),
+                    html.P("Inspired by Renaissance Technologies and D.E. Shaw. "
+                           "Engle-Granger cointegration test identifies pairs. "
+                           "Kalman Filter tracks dynamic hedge ratio. "
+                           "Spread z-score generates mean-reversion signals.",
+                           style={"color": "#bbb", "fontSize": "0.83rem"}),
+                ]), md=4),
+                dbc.Col(_card([
+                    html.H6("ML Signal Combination", style={"color": GOLD, "fontWeight": "bold"}),
+                    html.P("Inspired by Two Sigma and D.E. Shaw. "
+                           "Ridge, Elastic Net, Gradient Boosting, and Random Forest "
+                           "combine multiple weak signals into a stronger composite. "
+                           "Walk-forward validation prevents look-ahead bias.",
+                           style={"color": "#bbb", "fontSize": "0.83rem"}),
+                ]), md=4),
+                dbc.Col(_card([
+                    html.H6("Risk Parity & HRP", style={"color": RED, "fontWeight": "bold"}),
+                    html.P("Inspired by Bridgewater All Weather and AQR. "
+                           "Hierarchical Risk Parity (Lopez de Prado 2016) and "
+                           "Equal Risk Contribution ensure no single asset "
+                           "dominates portfolio risk — robust to correlation breakdown.",
+                           style={"color": "#bbb", "fontSize": "0.83rem"}),
+                ]), md=4),
+            ]),
+        ]),
 
         # ══════════════════════════════════════════════════════
         # STOCK SEARCH
