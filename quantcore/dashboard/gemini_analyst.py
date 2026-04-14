@@ -1,44 +1,39 @@
 """
-Claude AI Analyst for QuantCore.
+AI Analyst for QuantCore — powered by Google Gemini (free tier).
 
-Uses Anthropic's Claude API to provide AI-powered portfolio insights,
-stock commentary, and an interactive "Ask Odin" war counsel.
+Google Gemini API is completely free with no credit card required.
+Free tier: 15 requests/minute, 1,500 requests/day.
 
-Set the ANTHROPIC_API_KEY environment variable to enable AI features.
-Free API key: https://console.anthropic.com
+Get your free key at: https://aistudio.google.com/app/apikey
+Then set: GEMINI_API_KEY=your_key_here
 """
 
 import os
 import pandas as pd
 from typing import Dict
 
-# ── Attempt to load Anthropic SDK ─────────────────────────────────
-GEMINI_AVAILABLE = False   # kept as alias so app.py import doesn't break
-_anthropic = None
+# ── Attempt to load Gemini SDK ─────────────────────────────────────
+GEMINI_AVAILABLE = False
+_client = None
 
 try:
-    import anthropic as _anthropic_module
-    _api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+    import google.generativeai as genai
+    _api_key = os.environ.get("GEMINI_API_KEY", "")
     if _api_key:
-        _anthropic = _anthropic_module.Anthropic(api_key=_api_key)
+        genai.configure(api_key=_api_key)
+        _client = genai.GenerativeModel("gemini-1.5-flash")
         GEMINI_AVAILABLE = True
 except ImportError:
     pass
 
-MODEL = "claude-haiku-4-5-20251001"   # fast + affordable for dashboard use
-
 
 def _ask(prompt: str, fallback: str = "") -> str:
-    """Send a prompt to Claude; return fallback on any error."""
-    if _anthropic is None:
+    """Send a prompt to Gemini; return fallback on any error."""
+    if _client is None:
         return fallback
     try:
-        msg = _anthropic.messages.create(
-            model=MODEL,
-            max_tokens=300,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return msg.content[0].text.strip()
+        response = _client.generate_content(prompt)
+        return response.text.strip()
     except Exception as e:
         return f"[Oracle error: {e}]"
 
@@ -53,8 +48,9 @@ def portfolio_insight(
     """Auto-generated AI narrative about the portfolio's performance."""
     if not GEMINI_AVAILABLE:
         return (
-            "The Oracle sleeps. Set the ANTHROPIC_API_KEY environment variable "
-            "to awaken Claude-powered portfolio counsel from Odin's war advisors."
+            "The Oracle sleeps. Set the GEMINI_API_KEY environment variable "
+            "to awaken AI-powered portfolio counsel. "
+            "Free key (no credit card): https://aistudio.google.com/app/apikey"
         )
 
     ts_dict = (
@@ -82,12 +78,12 @@ Plain text only — no bullet points, no markdown. Under 150 words. Be direct.""
 
     return _ask(
         prompt,
-        fallback="Portfolio analysis unavailable. ANTHROPIC_API_KEY not configured.",
+        fallback="Portfolio analysis unavailable. GEMINI_API_KEY not configured.",
     )
 
 
 def stock_ai_commentary(ticker: str, metrics: Dict, valuation: Dict) -> str:
-    """Concise Claude analyst note for a stock. Empty string if API unavailable."""
+    """Concise AI analyst note for a stock. Empty string if API unavailable."""
     if not GEMINI_AVAILABLE:
         return ""
 
@@ -115,16 +111,16 @@ Professional hedge-fund tone. No markdown. Under 70 words."""
 
 
 def ask_odin(question: str, tearsheet_str: str, risk_str: str) -> str:
-    """Answer a user question about the portfolio via Claude."""
+    """Answer a user question about the portfolio via Gemini AI."""
     if not GEMINI_AVAILABLE:
         return (
-            "Odin's Oracle is offline. Add the ANTHROPIC_API_KEY environment variable "
-            "to your system or Railway/Render settings to awaken AI counsel.\n\n"
-            "Get your key at: https://console.anthropic.com"
+            "Odin's Oracle is offline. Set the GEMINI_API_KEY environment variable "
+            "to activate AI counsel.\n\n"
+            "Free key (no credit card needed): https://aistudio.google.com/app/apikey"
         )
 
     prompt = f"""You are Odin — the all-knowing AI war counsel embedded in QuantCore,
-an elite quantitative research platform powered by Claude.
+an elite quantitative research platform.
 
 Portfolio Performance Context: {tearsheet_str}
 Risk Context: {risk_str}
@@ -138,5 +134,5 @@ Plain text only — no markdown or bullet points."""
 
     return _ask(
         prompt,
-        fallback="The Oracle could not be reached. Check your ANTHROPIC_API_KEY.",
+        fallback="The Oracle could not be reached. Check your GEMINI_API_KEY.",
     )
